@@ -1,8 +1,8 @@
 connections:
   - name: "conn1"
-    dsn: "root:password@tcp(127.0.0.1:3306)/study"
+    dsn: "{{db_dsn}}"
   - name: "conn2"
-    dsn: "root:password@tcp(127.0.0.1:3306)/study"
+    dsn: "{{db_dsn}}"
 queries:
   - connection: "conn1"
     type: "exec"

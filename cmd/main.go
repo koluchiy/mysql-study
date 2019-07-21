@@ -6,14 +6,21 @@ import (
 	"github.com/koluchiy/mysql-study/pkg/runner"
 	"github.com/koluchiy/mysql-study/pkg/drawer"
 	"github.com/koluchiy/mysql-study/pkg/data"
+	"github.com/koluchiy/mysql-study/pkg/config"
 )
 
 func main() {
-	loader := data.NewLoader()
-	flow, err := loader.Load("data/gap-lock.yml")
+	cfg := config.GetConfig()
+
+	loader := data.NewLoader(cfg.DbConfig)
+
+	fmt.Println("Load flow from " + cfg.FlowPath)
+
+	flow, err := loader.Load(cfg.FlowPath)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 
 	conns := map[string]connection.Connection{}
@@ -24,7 +31,8 @@ func main() {
 		})
 
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			return
 		}
 
 		conns[c.Name] = conn
@@ -48,66 +56,10 @@ func main() {
 
 	r := runner.NewRunner(dr)
 
-	r.Run(runner.Flow{
+	err = r.Run(runner.Flow{
 		Queries: queries,
 		Connections: conns,
 	})
 
-	//conn1, err := connection.NewConnection(connection.Config{
-	//	Dsn: "root:password@tcp(127.0.0.1:3306)/study",
-	//})
-	//
-	//conn2, err := connection.NewConnection(connection.Config{
-	//	Dsn: "root:password@tcp(127.0.0.1:3306)/study",
-	//})
-	//
-	//dr := drawer.NewDrawer()
-	//
-	//r := runner.NewRunner(dr)
-	//err = r.Run(runner.Flow{
-	//	Connections: map[string]connection.Connection{
-	//		"conn1": conn1,
-	//		"conn2": conn2,
-	//	},
-	//	Queries: []runner.Query{
-	//		{
-	//			Type: runner.QueryTypeQuery,
-	//			Connection: "conn1",
-	//			Sql: "select * from users",
-	//		},
-	//		{
-	//			Type: runner.QueryTypeExec,
-	//			Connection: "conn2",
-	//			Sql: "begin",
-	//		},
-	//		{
-	//			Type: runner.QueryTypeExec,
-	//			Connection: "conn2",
-	//			Sql: "insert into users(title) values('user3')",
-	//		},
-	//		{
-	//			Type: runner.QueryTypeQuery,
-	//			Connection: "conn1",
-	//			Sql: "select * from users",
-	//			MessageAfter: drawer.NewMessageString("We still not see new row"),
-	//		},
-	//		{
-	//			Type: runner.QueryTypeExec,
-	//			Connection: "conn2",
-	//			Sql: "commit",
-	//		},
-	//		{
-	//			Type: runner.QueryTypeQuery,
-	//			Connection: "conn1",
-	//			Sql: "select * from users",
-	//			MessageAfter: drawer.NewMessageString("transaction commited, we see new row"),
-	//		},
-	//	},
-	//})
-
 	fmt.Println(err)
-
-	//res, err := conn.QueryContext(context.Background(), "select * from users")
-	//
-	//fmt.Println(err, res)
 }

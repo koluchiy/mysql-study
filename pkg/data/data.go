@@ -3,7 +3,12 @@ package data
 import (
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"bytes"
 )
+
+type Config struct {
+	DbDsn string
+}
 
 type Query struct {
 	Sql string `yaml:"sql"`
@@ -31,11 +36,13 @@ type Loader interface {
 }
 
 type loader struct {
-
+	cfg Config
 }
 
-func NewLoader() *loader {
-	return &loader{}
+func NewLoader(cfg Config) *loader {
+	return &loader{
+		cfg: cfg,
+	}
 }
 
 func (l *loader) Load(fileName string) (Flow, error) {
@@ -44,6 +51,8 @@ func (l *loader) Load(fileName string) (Flow, error) {
 	if err != nil {
 		return Flow{}, err
 	}
+
+	dataBytes = bytes.Replace(dataBytes, []byte("{{db_dsn}}"), []byte(l.cfg.DbDsn), -1)
 
 	var flow Flow
 	err = yaml.Unmarshal(dataBytes, &flow)

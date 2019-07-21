@@ -1,5 +1,7 @@
 # github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
+# github.com/namsral/flag v1.7.4-pre
+github.com/namsral/flag
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # google.golang.org/appengine v1.6.1
