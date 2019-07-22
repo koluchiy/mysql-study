@@ -79,3 +79,40 @@ queries:
     message_before: "try insert something in another transaction"
     message_after: "successfully insert"
     timeout: 5
+  - connection: "conn1"
+    type: "exec"
+    sql: "rollback"
+    timeout: 5
+  - connection: "conn1"
+    type: "exec"
+    sql: "insert into users(user_id) values (300),(301),(302),(303),(304)"
+    message_before: "insert some new data"
+    message_after: "successfully insert"
+    timeout: 5
+  - connection: "conn1"
+    type: "exec"
+    sql: "BEGIN"
+    message_before: "lock some value in sequential"
+    timeout: 5
+  - connection: "conn1"
+    type: "exec"
+    sql: "select * from users where user_id=302 for update"
+    timeout: 5
+    async: true
+    message_before: "gap lock on values [301,303)"
+  - connection: "conn2"
+    type: "exec"
+    sql: "insert into users(user_id) values (302)"
+    message_before: "try insert something in another transaction"
+    timeout: 5
+  - connection: "conn2"
+    type: "exec"
+    sql: "insert into users(user_id) values (303)"
+    message_before: "try insert something in another transaction"
+    message_after: "successfully insert"
+    timeout: 5
+  - connection: "conn2"
+    type: "exec"
+    sql: "insert into users(user_id) values (301)"
+    message_before: "try insert something in another transaction"
+    timeout: 5
